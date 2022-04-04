@@ -1,7 +1,11 @@
+import { imageConfigDefault } from "../../../../node_modules/next/dist/server/image-config.js";
 import { Component } from "./components/component.js"
-import { PageComponent } from "./pages/page.js"
+import { ImageComponent } from "./components/pages/item/image.js";
+import { PageComponent } from "./components/pages/page.js"
+
 
 // 최상위 class
+// page라는 컴포넌트를 만들고 만들어진 페이지를 붙여넣어줌
 class App { 
     
     private readonly page: PageComponent;
@@ -10,6 +14,10 @@ class App {
     constructor(appRoot: HTMLElement) {
         this.page = new PageComponent();
         this.page.attachTo(appRoot); // appRoot에 붙히기
+
+
+        const image = new ImageComponent('Image Title', 'https://picsum.photos/600/300')
+        image.attachTo(appRoot, 'beforeend')
     } 
 }
 
