@@ -1,42 +1,38 @@
-import { imageConfigDefault } from "../../../../node_modules/next/dist/server/image-config.js";
-import { Component } from "./components/component.js"
-import { ImageComponent } from "./components/pages/item/image.js";
-import { PageComponent } from "./components/pages/page.js"
+import { SquareComponent } from "./components/square.js"
 
+let pos = {
+    x: -1,
+    y: -1,
 
-// 최상위 class
-// page라는 컴포넌트를 만들고 만들어진 페이지를 붙여넣어줌
-class App { 
-    
-    private readonly page: PageComponent;
-    // 페이지 컴포넌트를 가져와
-    // App 클래스 생성시 인자로 받는 appRoot에 붙임
-    constructor(appRoot: HTMLElement) {
-        this.page = new PageComponent();
-        this.page.attachTo(appRoot); // appRoot에 붙히기
+};
+var cnt: number = 0;
 
+function getPosition(event: any): object {
+    var x: number = event.pageX;
+    var y: number = event.pageY;
 
-        const image = new ImageComponent('Image Title', 'https://picsum.photos/600/300')
-        image.attachTo(appRoot, 'beforeend')
-    } 
+    pos.x = x;
+    pos.y = y;
+    //console.log('x:', x, 'y:', y)
+    return { x, y };
 }
 
-// 어플리케이션 시작시 app클래스 만듦
-// document.querySelector('.document')! as HTMLElement => 무조건 HTMLElement임을 확신시켜줌
-new App(document.querySelector('.document')! as HTMLElement);
+window.onload = function () {
+
+    var canvas: HTMLElement = document.getElementById('document')!;
+    console.log('onload3', canvas);
+    canvas.addEventListener('mousemove', getPosition);
+    canvas.addEventListener('click', function () {
+        console.log('사각형 생성!');
+
+        cnt++ // 생성한 요소 갯수 카운팅
+
+        const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; border: 1px solid red"><div>`, pos.x, pos.y, cnt);
+        console.log("square  :: ", square);
+    })
+}
 
 
 
-// var cnt = 0;
 
-// class Car {
-//     engine = 0;
-//     move() {
-//         const engine = this.engine + 1;
-//         console.log(engine)
-//         console.log('engine')
-//     }
-// }
 
-// const car = new Car();
-// car.move();
