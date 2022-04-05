@@ -20,7 +20,7 @@ var BaseComponent = /** @class */ (function () {
             console.log('클릭한요소 ::', this);
         });
         this.attachTo(canvas, this.element, x, y, cnt);
-        console.log('생성한 요소 :::', this.element);
+        console.log('생성ㅇㅇㅇ한 요소 :::', this.element);
     }
     BaseComponent.prototype.attachTo = function (parent, element, x, y, cnt) {
         console.log('attachToss:', cnt);

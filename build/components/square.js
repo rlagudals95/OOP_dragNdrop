@@ -20,6 +20,7 @@ var component_1 = require("./component");
 var SquareComponent = /** @class */ (function (_super) {
     __extends(SquareComponent, _super);
     function SquareComponent(canvas, htmlString, x, y, cnt) {
+        console.log('cnt 나왈 :!', cnt);
         return _super.call(this, canvas, htmlString, x, y, cnt) || this;
     }
     return SquareComponent;

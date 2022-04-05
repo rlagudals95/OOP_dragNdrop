@@ -31,7 +31,7 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.attachTo(canvas, this.element, x, y, cnt);
 
 
-        console.log('생성한 요소 :::', this.element)
+        console.log('생성ㅇㅇㅇ한 요소 :::', this.element)
 
     }
 
