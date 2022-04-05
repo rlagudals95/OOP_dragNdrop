@@ -6,16 +6,17 @@ var BaseComponent = /** @class */ (function () {
         // container의 x, y 위치에 element를 그린다.
         var template = document.createElement('template');
         template.innerHTML = htmlString;
-        // html 요소 위치설정 
-        template.style.position = 'absolute';
-        template.style.left = x.toString();
-        template.style.top = y.toString();
-        // 드래그앤 드랍 기능추가
-        template.setAttribute('draggable', 'true');
         this.element = template.content.firstElementChild;
+        this.element.style.position = 'absolute';
+        this.element.style.left = x.toString() + 'px';
+        this.element.style.top = y.toString() + 'px';
+        this.element.setAttribute('draggable', 'true');
         cnt++;
+        this.attachTo(canvas, this.element, x, y, cnt);
     }
-    BaseComponent.prototype.attachTo = function (parent, x, y) {
+    BaseComponent.prototype.attachTo = function (parent, element, x, y, cnt) {
+        parent.appendChild(element);
+        console.log('attachTo');
     };
     BaseComponent.prototype.select = function () {
     };

@@ -1,6 +1,6 @@
 export interface Component {
     select(): void; // 선택
-    attachTo(parent: HTMLElement, x: number, y: number): void;
+    attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number): void;
 }
 
 export class BaseComponent<T extends HTMLElement> implements Component {
@@ -10,21 +10,24 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     constructor(canvas: HTMLElement, htmlString: string, x: number, y: number, cnt: number) {
         // container의 x, y 위치에 element를 그린다.
         const template = document.createElement('template');
-        template.innerHTML = htmlString;
-        // html 요소 위치설정 
-        template.style.position = 'absolute';
-        template.style.left = x.toString();
-        template.style.top = y.toString();
 
-        // 드래그앤 드랍 기능추가
-        template.setAttribute('draggable', 'true');
+        template.innerHTML = htmlString;
 
         this.element = template.content.firstElementChild! as HTMLElement;
+        this.element.style.position = 'absolute';
+        this.element.style.left = x.toString() + 'px';
+        this.element.style.top = y.toString() + 'px';
+        this.element.setAttribute('draggable', 'true');
         cnt++;
+
+
+        this.attachTo(canvas, this.element, x, y, cnt);
+
     }
 
-    attachTo(parent: HTMLElement, x: number, y: number) {
-
+    attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number) {
+        parent.appendChild(element);
+        console.log('attachTo');
     }
 
     select() { // z-index top
