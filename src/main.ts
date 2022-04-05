@@ -18,7 +18,6 @@ function getPosition(event: any): object {
 }
 
 window.onload = function () {
-
     var canvas: HTMLElement = document.getElementById('document')!;
     console.log('onload3', canvas);
     canvas.addEventListener('mousemove', getPosition);
@@ -26,8 +25,8 @@ window.onload = function () {
         console.log('사각형 생성!');
 
         cnt++ // 생성한 요소 갯수 카운팅
-
-        const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; border: 1px solid red"><div>`, pos.x, pos.y, cnt);
+        console.log('들어가는 cnt :: ', cnt)
+        const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
         console.log("square  :: ", square);
     })
 }
