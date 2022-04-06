@@ -7,14 +7,14 @@ let pos = {
 let cnt: number = 0; // 생성한 요소 개수
 let isDraw = false;
 
-function getPosition(event: any): object {
+function getPosition(event: any): void {
     let x: number = event.pageX;
     let y: number = event.pageY;
 
     pos.x = x;
     pos.y = y;
     //console.log('x:', x, 'y:', y)
-    return { x, y };
+    //return { x, y };
 }
 
 window.onload = function () {
@@ -41,11 +41,10 @@ window.onload = function () {
         console.log('사각형 생성!');
         if (isDraw) {
             cnt++ // 생성한 요소 갯수 카운팅
-            console.log('들어가는 cnt :: ', cnt)
 
             const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
         } else {
-            alert('DRAW 버튼을 활성화 시키고 클릭해주세요 :) ');
+            alert('상자추가하기 버튼을 클릭해주세요😀 ');
         }
     })
 }
