@@ -15,8 +15,10 @@ function getPosition(event) {
     return { x: x, y: y };
 }
 window.onload = function () {
-    var canvas = document.getElementById('document');
+    const canvas = document.getElementById('document');
+
     console.log('onload3', canvas);
+
     canvas.addEventListener('mousemove', getPosition);
     canvas.addEventListener('click', function () {
         console.log('사각형 생성!');
@@ -24,4 +26,5 @@ window.onload = function () {
         var square = new square_js_1.SquareComponent(canvas, "<div style=\"width: 200px; height: 200px; border: 1px solid red\"><div>", pos.x, pos.y, cnt);
         console.log("square  :: ", square);
     });
+
 };

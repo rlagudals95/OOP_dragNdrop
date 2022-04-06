@@ -1,5 +1,5 @@
 export interface Component {
-    select(): void; // 선택
+    moveTop(event: MouseEvent): void;
     attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number): void;
 }
 
@@ -22,16 +22,10 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.style.backgroundColor = 'red';
         this.element.style.opacity = '0.3';
 
-        this.element.addEventListener('click', function (event: MouseEvent) {
-            event.stopPropagation();
-            console.log('클릭한요소 ::', this);
-        })
-
-
+        this.element.addEventListener('click', this.moveTop);
         this.attachTo(canvas, this.element, x, y, cnt);
 
-
-        console.log('생성ㅇㅇㅇ한 요소 :::', this.element)
+        console.log('생성한 요소 :::', this.element)
 
     }
 
@@ -41,8 +35,9 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         parent.appendChild(element);
         console.log('attachTo');
     }
-    p
-    select() { // z-index to
 
+    moveTop(event: MouseEvent) { // z-index to
+        event.stopPropagation();
+        console.log('클릭한요소 ::', this);
     }
 }

@@ -21,19 +21,41 @@
             height: 100%;
 
         }
+
+        #drawSwitch {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 30px;
+            border-radius: 30px;
+            color: white;
+            justify-content: center;
+            /* background: #f7685b;
+            border: 1px solid #e54839; */
+            background: gray;
+            border: 1px solid black;
+            box-sizing: border-box;
+            font-style: normal;
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 16px;
+            display: flex;
+            align-items: center;
+            letter-spacing: -.04em;
+            cursor: pointer;
+        }
+
+        #drawSwitch:hover {
+            /* background: #e54839; */
+            opacity: 0.7;
+        }
     </style>
 </head>
 
 <body>
-
-    <!-- <li draggable="false" class="page-item">
-        <section class="page-item__body"></section>
-        <div class="page-item__controls">
-            <button class="close">&times;</button>
-        </div>
-    </li> -->
     <div id="document" class="document"></div>
-
+    <button id="drawSwitch">DRAW</button>
 </body>
 
 </html>

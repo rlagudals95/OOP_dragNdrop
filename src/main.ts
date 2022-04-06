@@ -3,13 +3,13 @@ import { SquareComponent } from "./components/square.js"
 let pos = {
     x: -1,
     y: -1,
-
 };
-var cnt: number = 0;
+let cnt: number = 0; // 생성한 요소 개수
+let isDraw = false;
 
 function getPosition(event: any): object {
-    var x: number = event.pageX;
-    var y: number = event.pageY;
+    let x: number = event.pageX;
+    let y: number = event.pageY;
 
     pos.x = x;
     pos.y = y;
@@ -18,16 +18,35 @@ function getPosition(event: any): object {
 }
 
 window.onload = function () {
-    var canvas: HTMLElement = document.getElementById('document')!;
-    console.log('onload3', canvas);
+    console.log('page onload!');
+    const drawSwitch = document.getElementById('drawSwitch');
+    const canvas: HTMLElement = document.getElementById('document')!;
+
+    drawSwitch.addEventListener('click', function () {
+        console.log('드로우 버튼 :', this)
+        const switchBtn: HTMLElement = this
+        isDraw = !isDraw
+        if (isDraw) {
+            switchBtn.style.background = '#f7685b';
+            switchBtn.style.border = '1px solid #e54839';
+        } else {
+            switchBtn.style.background = 'gray';
+            switchBtn.style.border = '1px solid black';
+        }
+        console.log('그리기!', isDraw);
+    })
+
     canvas.addEventListener('mousemove', getPosition);
     canvas.addEventListener('click', function () {
         console.log('사각형 생성!');
+        if (isDraw) {
+            cnt++ // 생성한 요소 갯수 카운팅
+            console.log('들어가는 cnt :: ', cnt)
 
-        cnt++ // 생성한 요소 갯수 카운팅
-        console.log('들어가는 cnt :: ', cnt)
-        const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
-        console.log("square  :: ", square);
+            const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
+        } else {
+            alert('DRAW 버튼을 활성화 시키고 클릭해주세요 :) ');
+        }
     })
 }
 
