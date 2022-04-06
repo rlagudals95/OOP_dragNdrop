@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <!-- ts는 브라우저에서 바로 불러올 수 없으므로 컴파일된 main.js  -->
     <link rel="stylesheet" type="text/css" href="../src/css/common.css">
     <style>
         html,
@@ -22,7 +21,7 @@
 
         }
 
-        #drawSwitch {
+        #draw-switch {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -46,16 +45,20 @@
             cursor: pointer;
         }
 
-        #drawSwitch:hover {
+        #draw-switch:hover {
             /* background: #e54839; */
             opacity: 0.7;
+        }
+
+        .d-element:hover {
+            opacity: 1;
         }
     </style>
 </head>
 
 <body>
     <div id="document" class="document"></div>
-    <button id="drawSwitch">DRAW</button>
+    <button id="draw-switch">DRAW</button>
 </body>
 
 </html>

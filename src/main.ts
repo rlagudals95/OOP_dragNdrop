@@ -19,10 +19,10 @@ function getPosition(event: any): object {
 
 window.onload = function () {
     console.log('page onload!');
-    const drawSwitch = document.getElementById('drawSwitch');
+    const draw_switch = document.getElementById('draw-switch');
     const canvas: HTMLElement = document.getElementById('document')!;
 
-    drawSwitch.addEventListener('click', function () {
+    draw_switch.addEventListener('click', function () {
         console.log('드로우 버튼 :', this)
         const switchBtn: HTMLElement = this
         isDraw = !isDraw
@@ -33,12 +33,13 @@ window.onload = function () {
             switchBtn.style.background = 'gray';
             switchBtn.style.border = '1px solid black';
         }
-        console.log('그리기!', isDraw);
+
     })
 
     canvas.addEventListener('mousemove', getPosition);
+
     canvas.addEventListener('click', function () {
-        console.log('사각형 생성!');
+        ;
         if (isDraw) {
             cnt++ // 생성한 요소 갯수 카운팅
             console.log('들어가는 cnt :: ', cnt)
