@@ -33,16 +33,16 @@ window.onload = function () {
             switchBtn.style.background = 'gray';
             switchBtn.style.border = '1px solid black';
         }
-        console.log('그리기!', isDraw);
     })
 
     canvas.addEventListener('mousemove', getPosition);
     canvas.addEventListener('click', function () {
-        console.log('사각형 생성!');
+
         if (isDraw) {
             cnt++ // 생성한 요소 갯수 카운팅
 
-            const square = new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
+            new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
+
         } else {
             alert('상자추가하기 버튼을 클릭해주세요😀 ');
         }
