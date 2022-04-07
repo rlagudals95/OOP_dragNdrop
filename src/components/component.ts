@@ -5,9 +5,9 @@ export interface Component {
     dragstart(event: MouseEvent): void;
     dragleave(event: MouseEvent): void;
     dragend(event: MouseEvent): void;
-    dragover(event: MouseEvent, obs: IntersectionObserver): void;
+    dragover(event: MouseEvent, element: HTMLElement): void;
     dragenter(event: MouseEvent)
-
+    dragable(element: HTMLElement)
     moveScroll(event: Event, object: any)
     resize()
     throttle(callback: Function, limit: number)
@@ -27,9 +27,9 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     private intersctionObserver: IntersectionObserver;
     private timer
     private elementId: string
+    private dragStartId: string
 
-    scollLeft: any;
-    scrollTop: number;
+
 
     constructor(canvas: HTMLElement, htmlString: string, x: number, y: number, cnt: number) {
 
@@ -46,7 +46,7 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.style.left = x.toString() + 'px';
         this.element.style.top = y.toString() + 'px';
         this.element.style.overflow = 'auto';
-        this.element.setAttribute('draggable', 'true');
+        //this.element.setAttribute('draggable', 'true');
 
 
         this.element.className = 'p-' + canvas.getAttribute('id');
@@ -58,33 +58,33 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.setAttribute('parent', canvas.getAttribute('id'))
         this.element.addEventListener('click', this.moveTop);
 
-        canvas.addEventListener('dragstart', this.dragstart)
+        //canvas.addEventListener('dragstart', this.dragstart)
         canvas.addEventListener('dragend', this.dragend)
 
-        const parentId = this.parentId
-
-        window.addEventListener('resize', function (e) {
-            console.log('resize!', parentId)
-            console.log(document.getElementById(parentId))
-            document.getElementById(parentId).style.height = '100%'
-            document.getElementById(parentId).style.width = '100%'
-        })
 
         let dragover = this.dragover
 
-        let obs;
-        const throttle = this.throttle
-
         canvas.addEventListener('dragover', function (e) {
-            dragover(e, obs);
+            dragover(e, this)
         })
         canvas.addEventListener('dragleave', this.dragleave)
 
-        this.element.addEventListener('dragend', this.movePosition);
+        this.dragable(this.element)
+        // this.element.addEventListener('dragstart', function (event) {
+        //     console.log('dragstart!', this.getAttribute('id'))
+        //     //makedragable(this)
+        //     //this.style.cursor = 'move'
+        //     //makedragable(this)
+        //     this.style.left = event.clientX + 'px';
+        //     this.style.top = event.clientY + 'px';
+        //     this.style.border = '2px solid red'
 
-        this.element.addEventListener('dragenter', function () {
-            this.style.border = '2px solid blue'
-        })
+
+        // })
+
+        //this.element.addEventListener('dragend', this.movePosition);
+
+        //this.element.addEventListener()
 
         this.element.addEventListener('dragleave', function () {
             this.style.border = 'none'
@@ -92,9 +92,20 @@ export class BaseComponent<T extends HTMLElement> implements Component {
 
         this.attachTo(canvas, this.element, x, y, cnt);
 
+        this.element.getAttribute('id')
 
         // for intersection observer
         this.elementId = (document.getElementsByClassName('p-document').length).toString() + '_element'
+
+        let elementId = this.elementId;
+
+        this.element.addEventListener('dragenter', function () {
+
+            let selectedId = this.getAttribute('id');
+            console.log(selectedId)
+            this.style.border = '2px solid blue'
+
+        })
 
         this.element.setAttribute('id', this.elementId);
         //console.log('observer "" ', this.element)
@@ -127,10 +138,10 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     }
 
     dragstart(e) {
-        //console.log('dragStart');
-        this.screenWidth = window.innerWidth;
-        this.screenHeight = window.innerHeight;
-        console.log(window.innerWidth, window.innerHeight);
+        console.log('dragStart');
+        //this.screenWidth = window.innerWidth;
+        //this.screenHeight = window.innerHeight;
+        //console.log(window.innerWidth, window.innerHeight);
     }
     dragend(e) {
         //console.log(window.innerWidth, window.innerHeight);
@@ -138,39 +149,19 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     }
     // 마우스 드래그 이벤트 !
 
-    dragover(e, obs) {
+    dragover(event, element) {
+        //console.log('over!!', this)
         //console.log(e.clientX)
+        console.log('over!')
+        element.style.left = event.clientX + 'px';
+        element.style.top = event.clientY + 'px';
 
-
-        // console.log(document.getElementsByClassName('p-document'))
-        // let pElements = document.getElementsByClassName('p-document');
-        // for (let i = 0; i < pElements.length; i++) {
-        //     console.log('요소들 : ', pElements[i])
-        // }
-        //console.log('no!')
-        //console.log('인터섹션!!', e, obs)
-
-        //throttle(console.log('throttle'), 10000)
-        // let element = this;
-        // console.log("디스~", this)
-
-        // //console.log('dragover', e)
-        // let rect = e.target.getBoundingClientRect();
-        // element.scollLeft += 200
-        // element.scrollTop += 200
-        // // 현재 마우스 위치
-        // let offsetX = e.clientX - rect.x;
-        // let offsetY = e.clientY - rect.y;
-        // console.log('스크롤 함수 확인 :: ', window)
-        // let x: number = e.clientX + 10;
-        // let y: number = e.clientY + 10;
-
+        console.log(element.style.left)
 
     }
 
+    // dragable로 대체
     movePosition(e) {
-
-        //console.log('mousedown :', e)
 
         let x: number = e.pageX;
         let y: number = e.pageY;
@@ -230,7 +221,6 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     }
 
     dragenter() {
-
         console.log('enter')
     }
 
@@ -254,4 +244,30 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         const observer = new IntersectionObserver(callback, options)
         observer.observe(element)
     }
+
+    dragable(element) {
+        /* Simple drag implementation */
+        element.onmousedown = function (event) {
+
+            document.onmousemove = function (event) {
+                //event = event || window.event;
+                element.style.left = event.clientX + 'px';
+                element.style.top = event.clientY + 'px';
+                window.scrollBy(event.clientX, event.clientY);
+            };
+
+            document.onmouseup = function () {
+                document.onmousemove = null;
+
+                if (element.releaseCapture) { element.releaseCapture(); }
+            };
+
+            if (element.setCapture) { element.setCapture(); }
+        };
+
+        element.unselectable = "on";
+        element.onselectstart = function () { return false };
+        element.style.userSelect = element.style.MozUserSelect = "none";
+    };
+
 }

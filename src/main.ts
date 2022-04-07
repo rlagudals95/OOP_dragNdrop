@@ -17,27 +17,62 @@ function getPosition(event: any): void {
     //return { x, y };
 }
 
+function makeDraggable(element) {
+    console.log('makeDraggable', element)
+    /* Simple drag implementation */
+    element.onmousedown = function (event) {
+
+        document.onmousemove = function (event) {
+
+            element.style.left = event.clientX + 'px';
+            element.style.top = event.clientY + 'px';
+        };
+
+        document.onmouseup = function () {
+            document.onmousemove = null;
+
+            if (element.releaseCapture) { element.releaseCapture(); }
+        };
+
+        if (element.setCapture) { element.setCapture(); }
+    };
+
+    /* These 3 lines are helpful for the browser to not accidentally 
+    * think the user is trying to "text select" the draggable object
+    * when drag initiation happens on text nodes.
+    * Unfortunately they also break draggability outside the window.
+    */
+    element.unselectable = "on";
+    element.onselectstart = function () { return false };
+    element.style.userSelect = element.style.MozUserSelect = "none";
+}
+
 window.onload = function () {
     console.log('page onload!');
+
     const drawSwitch = document.getElementById('drawSwitch');
     const canvas: HTMLElement = document.getElementById('document')!;
 
-    drawSwitch.addEventListener('click', function () {
-        console.log('드로우 버튼 :', this)
+
+    drawSwitch.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         const switchBtn: HTMLElement = this
         isDraw = !isDraw
         if (isDraw) {
             switchBtn.style.background = '#f7685b';
             switchBtn.style.border = '1px solid #e54839';
+            canvas.style.cursor = 'crosshair'
         } else {
             switchBtn.style.background = 'gray';
             switchBtn.style.border = '1px solid black';
+            canvas.style.cursor = 'not-allowed'
         }
     })
 
-    canvas.addEventListener('mousemove', getPosition);
-    canvas.addEventListener('click', function () {
-
+    document.addEventListener('mousemove', getPosition);
+    document.addEventListener('click', function () {
         if (isDraw) {
             cnt++ // 생성한 요소 갯수 카운팅
 
@@ -47,6 +82,8 @@ window.onload = function () {
             alert('상자추가하기 버튼을 클릭해주세요😀 ');
         }
     })
+
+
 }
 
 
