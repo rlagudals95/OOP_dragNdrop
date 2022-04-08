@@ -17,34 +17,16 @@ function getPosition(event: any): void {
     //return { x, y };
 }
 
-function makeDraggable(element) {
-    console.log('makeDraggable', element)
-    /* Simple drag implementation */
-    element.onmousedown = function (event) {
+function dragEnter(event) {
 
-        document.onmousemove = function (event) {
+    if (event.target.className == "droptarget") {
 
-            element.style.left = event.clientX + 'px';
-            element.style.top = event.clientY + 'px';
-        };
+        document.getElementById("demo").innerHTML = "다른 상자 진입";
 
-        document.onmouseup = function () {
-            document.onmousemove = null;
+        event.target.style.border = "3px dotted red";
 
-            if (element.releaseCapture) { element.releaseCapture(); }
-        };
+    }
 
-        if (element.setCapture) { element.setCapture(); }
-    };
-
-    /* These 3 lines are helpful for the browser to not accidentally 
-    * think the user is trying to "text select" the draggable object
-    * when drag initiation happens on text nodes.
-    * Unfortunately they also break draggability outside the window.
-    */
-    element.unselectable = "on";
-    element.onselectstart = function () { return false };
-    element.style.userSelect = element.style.MozUserSelect = "none";
 }
 
 window.onload = function () {
@@ -76,13 +58,15 @@ window.onload = function () {
         if (isDraw) {
             cnt++ // 생성한 요소 갯수 카운팅
 
-            new SquareComponent(canvas, `<div style="width: 200px; height: 200px; "><div>`, pos.x, pos.y, cnt);
+            new SquareComponent(canvas, `<div style="width: 200px; height: 200px;"><div>`, pos.x, pos.y, cnt);
 
         } else {
             alert('상자추가하기 버튼을 클릭해주세요😀 ');
         }
     })
 
+    const pointer = document.querySelector('p');
+    console.log('pointer', pointer)
 
 }
 

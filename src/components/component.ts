@@ -2,17 +2,22 @@ export interface Component {
     moveTop(event: MouseEvent): void;
     attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number): void;
     movePosition(event: MouseEvent): void;
-    dragstart(event: MouseEvent): void;
+    dragstart(event: MouseEvent, element: HTMLElement);
     dragleave(event: MouseEvent): void;
     dragend(event: MouseEvent): void;
     dragover(event: MouseEvent, element: HTMLElement): void;
     dragenter(event: MouseEvent)
-    dragable(element: HTMLElement)
+    draggable(element: HTMLElement)
     moveScroll(event: Event, object: any)
     resize()
     throttle(callback: Function, limit: number)
     observer(id: string);
+    makeDraggable(element: HTMLElement)
+    moveScrennWithMouse(element: HTMLElement)
+    detectOverlap(element: HTMLElement)
 }
+
+let waiting = false
 
 export class BaseComponent<T extends HTMLElement> implements Component {
 
@@ -46,7 +51,6 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.style.left = x.toString() + 'px';
         this.element.style.top = y.toString() + 'px';
         this.element.style.overflow = 'auto';
-        //this.element.setAttribute('draggable', 'true');
 
 
         this.element.className = 'p-' + canvas.getAttribute('id');
@@ -58,29 +62,32 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.setAttribute('parent', canvas.getAttribute('id'))
         this.element.addEventListener('click', this.moveTop);
 
-        //canvas.addEventListener('dragstart', this.dragstart)
-        canvas.addEventListener('dragend', this.dragend)
+        // let moveScrennWithMouse = this.moveScrennWithMouse
+        // this.element.addEventListener('mousedown', function () {
+        //     moveScrennWithMouse(this)
+        // })
 
 
+        // 드래그 on
+        this.draggable(this.element)
+        //this.element.setAttribute('draggable', 'true')
+
+
+        let dragstart = this.dragstart
+        this.element.addEventListener('dragstart', function (e) {
+            dragstart(e, this)
+        })
         let dragover = this.dragover
-
-        canvas.addEventListener('dragover', function (e) {
+        this.element.addEventListener('dragover', function (e) {
             dragover(e, this)
         })
+        this.element.addEventListener('dragend', this.movePosition)
+        //this.element.addEventListener('click', this.draggable)
+        //canvas.addEventListener('dragstart', this.dragstart)
+        //canvas.addEventListener('dragend', this.dragend)
+
         canvas.addEventListener('dragleave', this.dragleave)
 
-        this.dragable(this.element)
-        // this.element.addEventListener('dragstart', function (event) {
-        //     console.log('dragstart!', this.getAttribute('id'))
-        //     //makedragable(this)
-        //     //this.style.cursor = 'move'
-        //     //makedragable(this)
-        //     this.style.left = event.clientX + 'px';
-        //     this.style.top = event.clientY + 'px';
-        //     this.style.border = '2px solid red'
-
-
-        // })
 
         //this.element.addEventListener('dragend', this.movePosition);
 
@@ -91,7 +98,7 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         })
 
         this.attachTo(canvas, this.element, x, y, cnt);
-
+        //this.draggable(this.element)
         this.element.getAttribute('id')
 
         // for intersection observer
@@ -100,16 +107,20 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         let elementId = this.elementId;
 
         this.element.addEventListener('dragenter', function () {
-
             let selectedId = this.getAttribute('id');
             console.log(selectedId)
             this.style.border = '2px solid blue'
-
         })
+
 
         this.element.setAttribute('id', this.elementId);
         //console.log('observer "" ', this.element)
-        this.observer(this.element)
+        //this.observer(this.element)
+        // let makeDraggable = this.makeDraggable
+        // this.element.addEventListener('mousedown', function () {
+        //     makeDraggable(this)
+        // })
+        //this.makeDraggable(this.element);
 
     }
 
@@ -134,35 +145,84 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.selectedElement.remove();
         this.selectedElement.style.border = '2px solid red';
 
+        let selectedElement = this.selectedElement
+
         document.getElementById(this.parentId).append(this.selectedElement);
+
     }
 
-    dragstart(e) {
-        console.log('dragStart');
-        //this.screenWidth = window.innerWidth;
-        //this.screenHeight = window.innerHeight;
-        //console.log(window.innerWidth, window.innerHeight);
+
+    dragstart(event, element) {
+
+
+        // document.onmousemove = function (event) {
+        //     //event = event || window.event;
+        //     //element.setAttribute('draggable', 'false')
+        //     console.log('test?', document)
+        //     element.style.left = event.clientX + 'px';
+        //     element.style.top = event.clientY + 'px';
+        //     window.scrollBy(event.clientX, event.clientY);
+        //     //console.log('onmousemove')
+        // };
+
     }
+
     dragend(e) {
-        //console.log(window.innerWidth, window.innerHeight);
-        //console.log(e)
+        console.log('dragend')
     }
     // 마우스 드래그 이벤트 !
 
     dragover(event, element) {
-        //console.log('over!!', this)
-        //console.log(e.clientX)
-        console.log('over!')
-        element.style.left = event.clientX + 'px';
-        element.style.top = event.clientY + 'px';
+        element.setAttribute('selected', 'true');
 
-        console.log(element.style.left)
+        function throttle() {
+            if (!waiting) {
+
+                const selectedElement = element.getBoundingClientRect();
+
+                console.log('selectedElement :: ', selectedElement)
+                let selectedId = element.getAttribute('id')
+                let Elements = document.getElementsByClassName('p-document')
+                let isSelected = element.getAttribute('selected')
+
+                //console.log('Elements ll', Elements.length)
+                // 자신말고
+                for (let i = 0; i < Elements.length; i++) {
+                    //console.log('Elements', Elements[i])
+                    let elementRect = Elements[i].getBoundingClientRect();
+                    let elementId = Elements[i].getAttribute('id')
+                    let _element = Elements[i] as HTMLElement
+
+                    console.log('dlrjsahdi!: ', _element.getAttribute('selected'))
+                    if (!_element.getAttribute('selected') &&
+                        (selectedElement.left < elementRect.left && selectedElement.right > elementRect.left) ||
+                        (selectedElement.left < elementRect.right && selectedElement.right > elementRect.right) ||
+                        (selectedElement.top < elementRect.top && selectedElement.bottom > elementRect.top) ||
+                        (selectedElement.top < elementRect.bottom && selectedElement.bottom > elementRect.bottom)
+                    ) {
+                        //alert('겹침!')
+
+                        _element.style.border = '2px solid blue'
+                        console.log('겹침', Elements[i])
+                    } else {
+                        _element.style.border = 'none'
+                    }
+                }
+                console.log('selectedElement :: ', selectedElement)
+                waiting = false
+                setTimeout(() => {
+                    waiting = false
+                }, 100)
+            }
+        }
+
+        throttle()
 
     }
 
     // dragable로 대체
     movePosition(e) {
-
+        console.log('dragend!')
         let x: number = e.pageX;
         let y: number = e.pageY;
 
@@ -171,31 +231,12 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.draggedElement.style.top = y.toString() + 'px';
 
 
+        this.draggedElement.removeAttribute('selected')
         //console.log('포지션체크 ::', this)
     }
 
     dragleave(e) {
-        //let rect = e.target.getBoundingClientRect();
-        //let body = document.getElementsByTagName('body')[0]
-        // 현재 마우스 위치
-        //let offsetX = e.clientX - rect.x;
-        //let offsetY = e.clientY - rect.y;
-        // TODO : scroll move 
-        //console.log('leave', e)
 
-        //this.parentObject = this
-
-        // console.log('leave', this)
-        // console.log('leave2', this.parentObject.scrollWidth, this.parentObject.scrollWidth)
-        // console.log('leave3:', body.scrollWidth, body.scrollHeight)
-        // 화면을 벗어날 시 스크롤이 생기며 그 방향으로 화면이동
-        //console.log('leave :', offsetX, offsetY)
-
-        // this.parentObject.style.width = body.scrollWidth.toString() + 'px';
-        //this.parentObject.style.height = body.scrollHeight.toString() + 'px';
-        //console.log('111 :', this.parentObject)
-
-        //this.scollLeft.scrollLeft + 1000
     }
 
     moveScroll(e) {
@@ -244,30 +285,237 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         const observer = new IntersectionObserver(callback, options)
         observer.observe(element)
     }
+    //this.element.setAttribute('draggable', 'true')
+    draggable(element) {
 
-    dragable(element) {
-        /* Simple drag implementation */
         element.onmousedown = function (event) {
+            console.log('onmousedown')
+            //element.setAttribute('draggable', 'true')
 
+            //element.setAttribute('draggable', 'false')
             document.onmousemove = function (event) {
                 //event = event || window.event;
+                //element.setAttribute('draggable', 'false')
+
                 element.style.left = event.clientX + 'px';
                 element.style.top = event.clientY + 'px';
                 window.scrollBy(event.clientX, event.clientY);
+                //console.log('onmousemove')
+
+                //
+                element.setAttribute('selected', 'true');
+
+
+                // detect overlap
+                function throttle() {
+                    console.log('??')
+                    if (!waiting) {
+
+                        const selectedElement = element.getBoundingClientRect();
+
+                        console.log('selectedElement :: ', selectedElement)
+                        let selectedId = element.getAttribute('id')
+                        let Elements = document.getElementsByClassName('p-document')
+                        let isSelected = element.getAttribute('selected')
+
+                        //console.log('Elements ll', Elements.length)
+                        // 자신말고
+                        for (let i = 0; i < Elements.length; i++) {
+                            //console.log('Elements', Elements[i])
+                            let elementRect = Elements[i].getBoundingClientRect();
+                            let elementId = Elements[i].getAttribute('id')
+                            let _element = Elements[i] as HTMLElement
+
+                            console.log('dlrjsahdi!: ', _element.getAttribute('selected'))
+                            if (!_element.getAttribute('selected') &&
+                                selectedElement.x < elementRect.x + elementRect.width &&
+                                selectedElement.x + selectedElement.width > elementRect.x &&
+                                selectedElement.y < elementRect.y + elementRect.height &&
+                                selectedElement.height + selectedElement.y > elementRect.y
+                            ) {
+                                //alert('겹침!')
+
+                                _element.style.border = '2px solid blue'
+                                console.log('겹침', Elements[i])
+                            } else {
+                                _element.style.border = 'none'
+                            }
+                        }
+                        console.log('selectedElement :: ', selectedElement)
+                        waiting = true
+                        setTimeout(() => {
+                            waiting = false
+                        }, 100)
+                    }
+                }
+
+                throttle();
+
             };
 
             document.onmouseup = function () {
                 document.onmousemove = null;
+                element.removeAttribute('selected')
+                console.log('onmouseup')
 
                 if (element.releaseCapture) { element.releaseCapture(); }
             };
 
             if (element.setCapture) { element.setCapture(); }
-        };
+        }
 
         element.unselectable = "on";
         element.onselectstart = function () { return false };
         element.style.userSelect = element.style.MozUserSelect = "none";
     };
 
+    makeDraggable(element) {
+        function test(event) {
+            console.log('test!!')
+            document.onmousemove = function (event) {
+                //event = event || window.event;
+                //element.setAttribute('draggable', 'false')
+                console.log(document)
+                element.style.left = event.clientX + 'px';
+                element.style.top = event.clientY + 'px';
+                window.scrollBy(event.clientX, event.clientY);
+                //console.log('onmousemove')
+
+            };
+
+            document.onmouseup = function () {
+                document.onmousemove = null;
+
+                console.log('onmouseup')
+
+                if (element.releaseCapture) { element.releaseCapture(); }
+            };
+
+            if (element.setCapture) { element.setCapture(); }
+
+            element.unselectable = "on";
+            element.onselectstart = function () { return false };
+            element.style.userSelect = element.style.MozUserSelect = "none";
+        }
+
+        test(event)
+    }
+
+    // 마우스 위치에 따라 화면 전환
+    moveScrennWithMouse(element) {
+        document.onmousemove = function (event) {
+            //event = event || window.event;
+            //element.setAttribute('draggable', 'false')
+            //console.log('test?', document)
+            element.style.left = event.clientX + 'px';
+            element.style.top = event.clientY + 'px';
+            window.scrollBy(event.clientX, event.clientY);
+            //console.log('onmousemove')
+        };
+    }
+
+    detectOverlap(element) {
+        const selectedElement = element.getBoundingClientRect();
+
+        console.log('selectedElement :: ', selectedElement)
+
+        // if (selectedElement.top > domRect2.bottom ||
+        //     selectedElement.right < domRect2.left ||
+        //     selectedElement.bottom < domRect2.top ||
+        //     selectedElement.left > domRect2.right) {
+
+        // }
+
+
+    }
+
 }
+
+
+// draggable(element) {
+
+//     element.onmousedown = function (event) {
+//         console.log('onmousedown')
+//         //element.setAttribute('draggable', 'true')
+
+//         //element.setAttribute('draggable', 'false')
+//         document.onmousemove = function (event) {
+//             //event = event || window.event;
+//             //element.setAttribute('draggable', 'false')
+//             element.addEventListener('dragenter', function () {
+//                 console.log('?')
+//             })
+//             element.style.left = event.clientX + 'px';
+//             element.style.top = event.clientY + 'px';
+//             window.scrollBy(event.clientX, event.clientY);
+//             //console.log('onmousemove')
+
+//         };
+
+//         document.onmouseup = function () {
+//             document.onmousemove = null;
+
+//             console.log('onmouseup')
+
+//             if (element.releaseCapture) { element.releaseCapture(); }
+//         };
+
+//         if (element.setCapture) { element.setCapture(); }
+//     }
+
+//     element.unselectable = "on";
+//     element.onselectstart = function () { return false };
+//     element.style.userSelect = element.style.MozUserSelect = "none";
+// };
+
+
+
+// dragover(event, element) {
+//     element.setAttribute('selected', 'true');
+
+//     function throttle() {
+//         if (!waiting) {
+//             const selectedElement = element.getBoundingClientRect();
+//             let selectedId = element.getAttribute('id')
+//             let Elements = document.getElementsByClassName('p-document')
+//             let isSelected = element.getAttribute('selected')
+
+//             //console.log('Elements ll', Elements.length)
+//             // 자신말고
+//             for (let i = 0; i < Elements.length; i++) {
+//                 //console.log('Elements', Elements[i])
+//                 let elementRect = Elements[i].getBoundingClientRect();
+//                 let elementId = Elements[i].getAttribute('id')
+//                 let _element = Elements[i] as HTMLElement
+
+//                 console.log('dlrjsahdi!: ', _element.getAttribute('selected'))
+//                 if (!_element.getAttribute('selected') && selectedElement.top > elementRect.bottom ||
+//                     selectedElement.right < elementRect.left ||
+//                     selectedElement.bottom < elementRect.top ||
+//                     selectedElement.left > elementRect.right) {
+//                     //alert('겹침!')
+
+//                     _element.style.border = '2px solid blue'
+//                     console.log('겹침', Elements[i])
+//                 }
+//             }
+//             console.log('selectedElement :: ', selectedElement)
+//             waiting = true
+//             setTimeout(() => {
+//                 waiting = false
+//             }, 1000)
+//         }
+//     }
+
+//     // if (selectedElement.top > domRect2.bottom ||
+//     //     selectedElement.right < domRect2.left ||
+//     //     selectedElement.bottom < domRect2.top ||
+//     //     selectedElement.left > domRect2.right) {
+
+//     // }
+
+//     throttle()
+
+//     //console.log('eee ": ', event)
+
+// }
