@@ -13,21 +13,10 @@ function getPosition(event: any): void {
 
     pos.x = x;
     pos.y = y;
-    //console.log('x:', x, 'y:', y)
-    //return { x, y };
-}
-
-function dragEnter(event) {
-
-    if (event.target.className == "droptarget") {
-
-        document.getElementById("demo").innerHTML = "다른 상자 진입";
-
-        event.target.style.border = "3px dotted red";
-
-    }
 
 }
+
+
 
 window.onload = function () {
     console.log('page onload!');
@@ -64,9 +53,6 @@ window.onload = function () {
             alert('상자추가하기 버튼을 클릭해주세요😀 ');
         }
     })
-
-    const pointer = document.querySelector('p');
-    console.log('pointer', pointer)
 
 }
 

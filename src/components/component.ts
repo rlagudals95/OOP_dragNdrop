@@ -1,8 +1,9 @@
 export interface Component {
-    moveTop(event: MouseEvent): void;
-    attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number): void;
-    movePosition(event: MouseEvent): void
-    draggable(element: HTMLElement);
+    moveTop(event: MouseEvent);
+    attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number);
+    movePosition(event: MouseEvent);
+    draggable(element: HTMLElement, detectOverlap: Function, throttle: Function);
+    detectOverlap(element: HTMLElement);
 }
 
 let waiting = false
@@ -29,8 +30,6 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.style.transform = 'translate(-50%, -50%)'
         this.element.style.left = x.toString() + 'px';
         this.element.style.top = y.toString() + 'px';
-        this.element.style.overflow = 'auto';
-
 
         this.element.className = 'p-' + canvas.getAttribute('id');
 
@@ -42,33 +41,11 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.addEventListener('click', this.moveTop);
 
 
-
-
         // 드래그 on
-        this.draggable(this.element)
+        this.draggable(this.element, this.detectOverlap, this.throttle)
         //this.element.setAttribute('draggable', 'true')
-        this.element.addEventListener('dragend', this.movePosition)
-
-
-
-        this.element.addEventListener('dragleave', function () {
-            this.style.border = 'none'
-        })
-
-        this.attachTo(canvas, this.element, x, y, cnt);
-
-        this.element.getAttribute('id')
-
-        // for intersection observer
-        this.elementId = (document.getElementsByClassName('p-document').length).toString() + '_element'
-
-        this.element.addEventListener('dragenter', function () {
-            let selectedId = this.getAttribute('id');
-            console.log(selectedId)
-            this.style.border = '2px solid blue'
-        })
-
         this.element.setAttribute('id', this.elementId);
+        this.attachTo(canvas, this.element, x, y, cnt);
 
     }
 
@@ -97,8 +74,6 @@ export class BaseComponent<T extends HTMLElement> implements Component {
 
     }
 
-
-    // dragable로 대체
     movePosition(e) {
         console.log('dragend!')
         let x: number = e.pageX;
@@ -108,76 +83,22 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.draggedElement.style.left = x.toString() + 'px';
         this.draggedElement.style.top = y.toString() + 'px';
 
-
         this.draggedElement.removeAttribute('selected')
-        //console.log('포지션체크 ::', this)
     }
 
 
-    draggable(element) {
+    draggable(element, detectOverlap, throttle) {
 
         element.onmousedown = function (event) {
-            console.log('onmousedown')
-            //element.setAttribute('draggable', 'true')
-
-            //element.setAttribute('draggable', 'false')
             document.onmousemove = function (event) {
-                //event = event || window.event;
-                //element.setAttribute('draggable', 'false')
 
                 element.style.left = event.clientX + 'px';
                 element.style.top = event.clientY + 'px';
                 window.scrollBy(event.clientX, event.clientY);
-                //console.log('onmousemove')
 
-                //
                 element.setAttribute('selected', 'true');
 
-
-                // detect overlap
-                function throttle() {
-                    console.log('??')
-                    if (!waiting) {
-
-                        const selectedElement = element.getBoundingClientRect();
-
-                        console.log('selectedElement :: ', selectedElement)
-                        let selectedId = element.getAttribute('id')
-                        let Elements = document.getElementsByClassName('p-document')
-                        let isSelected = element.getAttribute('selected')
-
-                        //console.log('Elements ll', Elements.length)
-                        // 자신말고
-                        for (let i = 0; i < Elements.length; i++) {
-                            //console.log('Elements', Elements[i])
-                            let elementRect = Elements[i].getBoundingClientRect();
-                            let elementId = Elements[i].getAttribute('id')
-                            let _element = Elements[i] as HTMLElement
-
-                            console.log('dlrjsahdi!: ', _element.getAttribute('selected'))
-                            if (!_element.getAttribute('selected') &&
-                                selectedElement.x < elementRect.x + elementRect.width &&
-                                selectedElement.x + selectedElement.width > elementRect.x &&
-                                selectedElement.y < elementRect.y + elementRect.height &&
-                                selectedElement.height + selectedElement.y > elementRect.y
-                            ) {
-                                //alert('겹침!')
-
-                                _element.style.border = '2px solid blue'
-                                console.log('겹침', Elements[i])
-                            } else {
-                                _element.style.border = 'none'
-                            }
-                        }
-                        console.log('selectedElement :: ', selectedElement)
-                        waiting = true
-                        setTimeout(() => {
-                            waiting = false
-                        }, 100)
-                    }
-                }
-
-                throttle();
+                throttle(detectOverlap(element), 100);
 
             };
 
@@ -198,6 +119,41 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     };
 
 
+    detectOverlap(element) {
 
+        const selectedElement = element.getBoundingClientRect();
+
+        let Elements = document.getElementsByClassName('p-document')
+
+        // 겹치는 element 검사
+        for (let i = 0; i < Elements.length; i++) {
+            let elementRect = Elements[i].getBoundingClientRect();
+            let _element = Elements[i] as HTMLElement
+
+            if (!_element.getAttribute('selected') &&
+                selectedElement.x < elementRect.x + elementRect.width &&
+                selectedElement.x + selectedElement.width > elementRect.x &&
+                selectedElement.y < elementRect.y + elementRect.height &&
+                selectedElement.height + selectedElement.y > elementRect.y
+            ) {
+                _element.style.border = '2px solid blue'
+            } else {
+                _element.style.border = 'none'
+            }
+        }
+    }
+
+    throttle(callback, limit = 100) {
+
+        return function () {
+            if (!waiting) {
+                callback.apply(this, arguments)
+                waiting = true
+                setTimeout(() => {
+                    waiting = false
+                }, limit)
+            }
+        }
+    }
 }
 
