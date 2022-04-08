@@ -15,7 +15,10 @@ function getPosition(event: any): void {
     pos.y = y;
 
 }
-
+function test() {
+    console.log('resize')
+}
+window.addEventListener('resize', test)
 
 
 window.onload = function () {
@@ -43,7 +46,10 @@ window.onload = function () {
     })
 
     document.addEventListener('mousemove', getPosition);
-    document.addEventListener('click', function () {
+    document.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('생성!')
         if (isDraw) {
             cnt++ // 생성한 요소 갯수 카운팅
 

@@ -2,7 +2,7 @@ export interface Component {
     moveTop(event: MouseEvent);
     attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number);
     movePosition(event: MouseEvent);
-    draggable(element: HTMLElement, detectOverlap: Function, throttle: Function);
+    draggable(element: HTMLElement, detectOverlap: Function, throttle: Function, canvas: HTMLElement);
     detectOverlap(element: HTMLElement);
 }
 
@@ -31,7 +31,8 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.style.left = x.toString() + 'px';
         this.element.style.top = y.toString() + 'px';
 
-        this.element.className = 'p-' + canvas.getAttribute('id');
+        this.element.className = 'p-' + this.parentId;
+
 
         this.element.style.backgroundColor = 'rgba(255,0,0,0.2)';
         this.element.style.opacity = '1';
@@ -40,22 +41,27 @@ export class BaseComponent<T extends HTMLElement> implements Component {
         this.element.setAttribute('parent', canvas.getAttribute('id'))
         this.element.addEventListener('click', this.moveTop);
 
-
         // 드래그 on
-        this.draggable(this.element, this.detectOverlap, this.throttle)
+        this.draggable(this.element, this.detectOverlap, this.throttle, canvas)
         //this.element.setAttribute('draggable', 'true')
         this.element.setAttribute('id', this.elementId);
         this.attachTo(canvas, this.element, x, y, cnt);
 
+        this.elementId = (document.getElementsByClassName('p-document').length).toString() + '_element'
+        this.element.setAttribute('id', this.elementId);
+
     }
 
     attachTo(parent: HTMLElement, element: HTMLElement, x: number, y: number, cnt: number) {
+        console.log('attatch!!!', x, y)
         parent.appendChild(element);
+
     }
 
     moveTop(event: MouseEvent) { // z-index to
         console.log('moveTop!');
         event.stopPropagation();
+        event.preventDefault();
         this.selectedElement = this;
         this.parentId = this.selectedElement.getAttribute("parent")! as string;
 
@@ -75,6 +81,8 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     }
 
     movePosition(e) {
+        e.preventDefault();
+        e.stopPropagation();
         console.log('dragend!')
         let x: number = e.pageX;
         let y: number = e.pageY;
@@ -87,11 +95,11 @@ export class BaseComponent<T extends HTMLElement> implements Component {
     }
 
 
-    draggable(element, detectOverlap, throttle) {
+    draggable(element, detectOverlap, throttle, canvas) {
 
         element.onmousedown = function (event) {
             document.onmousemove = function (event) {
-
+                console.log(document.getElementsByTagName('body')[0].style.width)
                 element.style.left = event.clientX + 'px';
                 element.style.top = event.clientY + 'px';
                 window.scrollBy(event.clientX, event.clientY);
